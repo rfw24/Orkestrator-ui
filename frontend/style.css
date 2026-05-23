@@ -21,7 +21,6 @@ body {
     flex-direction: row;
 }
 
-/* Responsivitas Layar Ponsel: Menumpuk secara vertikal */
 @media (max-width: 768px) {
     .container {
         flex-direction: column;
@@ -82,4 +81,28 @@ iframe {
     flex: 1;
     background-color: var(--bg-main);
     border: 1px solid var(--accent);
+}
+
+.btn-bad { 
+    border-color: #A85D5D; 
+    color: #E0E0E0; 
+}
+.btn-bad:active { 
+    background-color: #A85D5D; 
+}
+
+.btn-neutral { 
+    border-color: #8C8C8C; 
+    color: #E0E0E0; 
+}
+.btn-neutral:active { 
+    background-color: #8C8C8C; 
+}
+
+.btn-good { 
+    border-color: #5DA87A; 
+    color: #E0E0E0; 
+}
+.btn-good:active { 
+    background-color: #5DA87A; 
 }

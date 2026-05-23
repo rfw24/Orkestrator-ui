@@ -8,7 +8,6 @@
 </head>
 <body>
     <div class="container">
-        <!-- Panel Kiri: Interaksi AI -->
         <div class="panel controls-panel">
             <h2>Prompt Middleware</h2>
             <textarea id="userInput" placeholder="Masukkan deskripsi logika menu (Contoh: Tombol dengan animasi Tween)"></textarea>
@@ -17,14 +16,13 @@
             <div class="feedback-section" id="mode2" style="display: none;">
                 <p>Beri nilai performa fungsi ini:</p>
                 <div class="rating-buttons">
-                    <button class="btn-rate" data-score="1">1 (Buruk)</button>
-                    <button class="btn-rate" data-score="3">3 (Standar)</button>
-                    <button class="btn-rate" data-score="5">5 (Sempurna)</button>
+                    <button class="btn-rate btn-bad" data-score="-1">-1 (Buruk)</button>
+                    <button class="btn-rate btn-neutral" data-score="0">0 (Netral)</button>
+                    <button class="btn-rate btn-good" data-score="1">+1 (Bagus)</button>
                 </div>
             </div>
         </div>
 
-        <!-- Panel Kanan: Proyektor Sandbox Godot -->
         <div class="panel sandbox-panel">
             <iframe id="godotFrame" src="about:blank" title="Godot Sandbox Preview"></iframe>
         </div>
