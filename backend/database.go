@@ -1,46 +1,33 @@
 package main
 
 import (
-	"context"
-	"encoding/json"
+	"database/sql"
 	"log"
-	"net/http"
-	"time"
+
+	_ "github.com/mattn/go-sqlite3"
 )
 
-func main() {
-	db := initDB()
-	defer db.Close()
-
-	mux := http.NewServeMux()
-	
-	// Rute statis ke folder frontend yang baru saja Anda push
-	mux.Handle("/", http.FileServer(http.Dir("../frontend")))
-
-	// Rute penerima prompt
-	mux.HandleFunc("/api/generate", func(w http.ResponseWriter, r *http.Request) {
-		ctx, cancel := context.WithTimeout(r.Context(), 10*time.Second)
-		defer cancel()
-		_ = ctx
-
-		if r.Method != http.MethodPost {
-			http.Error(w, "Metode ditolak", http.StatusMethodNotAllowed)
-			return
-		}
-
-		w.Header().Set("Content-Type", "application/json")
-		json.NewEncoder(w).Encode(map[string]string{
-			"status": "Backend Golang siap menerima API Gemini",
-		})
-	})
-
-	server := &http.Server{
-		Addr:         ":8080",
-		Handler:      mux,
-		ReadTimeout:  5 * time.Second,
-		WriteTimeout: 15 * time.Second,
+func initDB() *sql.DB {
+	db, err := sql.Open("sqlite3", "./knowledge_base.db")
+	if err != nil {
+		log.Fatal("Koneksi gagal:", err)
 	}
 
-	log.Println("Server aktif di port 8080")
-	log.Fatal(server.ListenAndServe())
+	query := `
+	CREATE TABLE IF NOT EXISTS kumpulan_script (
+		id INTEGER PRIMARY KEY AUTOINCREMENT,
+		kategori TEXT NOT NULL,
+		deskripsi TEXT NOT NULL,
+		kode_gdscript TEXT NOT NULL,
+		skor_kualitas INTEGER DEFAULT 0,
+		total_digunakan INTEGER DEFAULT 0
+	);`
+
+	_, err = db.Exec(query)
+	if err != nil {
+		log.Fatal("Skema gagal:", err)
+	}
+
+	log.Println("Database SQLite aktif.")
+	return db
 }
