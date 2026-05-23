@@ -56,11 +56,11 @@ func main() {
 		}
 		defer client.Close()
 
-		model := client.GenerativeModel("gemini-1.5-pro-latest")
+		model := client.GenerativeModel("gemini-3.5-flash")
 		
 		// Instruksi absolut: Blokir format markdown, paksa output GDScript murni
 		model.SystemInstruction = &genai.Content{
-			Parts: []genai.Part{genai.Text("Kamu adalah middleware Godot 4. Hasilkan hanya kode GDScript mentah. Fokus pada interaksi mobile (button_down/button_up). Dilarang menulis penjelasan, dilarang menggunakan markdown ```gdscript.")},
+			Parts: []genai.Part{genai.Text("Middleware Godot 4. Hasilkan kode GDScript mentah. Fokus interaksi mobile. Dilarang: penjelasan, komentar (#), markdown, spasi berlebih, baris kosong berulang. Tulis logika absolut sependek mungkin.")},
 		}
 
 		resp, err := model.GenerateContent(ctx, genai.Text(reqBody.Prompt))
