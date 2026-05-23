@@ -1,3 +1,5 @@
+let lastGeneratedCode = "";
+
 document.getElementById('btnGenerate').addEventListener('click', async () => {
     const promptText = document.getElementById('userInput').value;
     const btn = document.getElementById('btnGenerate');
@@ -19,8 +21,8 @@ document.getElementById('btnGenerate').addEventListener('click', async () => {
         if (!response.ok) throw new Error("Gagal merespons dari server backend");
 
         const data = await response.json();
+        lastGeneratedCode = data.result;
         
-        // Merender hasil ke dalam iframe dengan tema charcoal
         const iframe = document.getElementById('godotFrame');
         const iframeDoc = iframe.contentWindow.document;
         iframeDoc.open();
@@ -33,7 +35,6 @@ document.getElementById('btnGenerate').addEventListener('click', async () => {
         `);
         iframeDoc.close();
 
-        // Memicu kemunculan tombol Mode 2
         document.getElementById('mode2').style.display = 'block';
 
     } catch (error) {
@@ -44,12 +45,28 @@ document.getElementById('btnGenerate').addEventListener('click', async () => {
     }
 });
 
-// Placeholder logika metrik penilaian
 document.querySelectorAll('.btn-rate').forEach(button => {
-    button.addEventListener('click', (e) => {
-        const score = e.target.getAttribute('data-score');
-        console.log("Skor diinput:", score);
-        alert(`Skor ${score} dicatat untuk evaluasi performa!`);
-        document.getElementById('mode2').style.display = 'none';
+    button.addEventListener('click', async (e) => {
+        const score = parseInt(e.target.getAttribute('data-score'));
+        const promptText = document.getElementById('userInput').value;
+        
+        try {
+            const response = await fetch('/api/rate', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ 
+                    deskripsi: promptText, 
+                    kode: lastGeneratedCode, 
+                    skor: score 
+                })
+            });
+            
+            if (!response.ok) throw new Error("Penolakan dari server lokal");
+            
+            alert(`Skor ${score} berhasil dikunci ke SQLite.`);
+            document.getElementById('mode2').style.display = 'none';
+        } catch (error) {
+            alert("Gagal menyimpan metrik: " + error.message);
+        }
     });
 });

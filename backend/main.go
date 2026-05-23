@@ -17,6 +17,12 @@ type RequestBody struct {
 	Prompt string `json:"prompt"`
 }
 
+type RateBody struct {
+	Deskripsi string `json:"deskripsi"`
+	Kode      string `json:"kode"`
+	Skor      int    `json:"skor"`
+}
+
 func main() {
 	err := godotenv.Load()
 	if err != nil {
@@ -58,14 +64,13 @@ func main() {
 
 		model := client.GenerativeModel("gemini-3.5-flash")
 		
-		// Instruksi absolut: Blokir format markdown, paksa output GDScript murni
 		model.SystemInstruction = &genai.Content{
 			Parts: []genai.Part{genai.Text("Middleware Godot 4. Hasilkan kode GDScript mentah. Fokus interaksi mobile. Dilarang: penjelasan, komentar (#), markdown, spasi berlebih, baris kosong berulang. Tulis logika absolut sependek mungkin.")},
 		}
 
 		resp, err := model.GenerateContent(ctx, genai.Text(reqBody.Prompt))
 		if err != nil {
-			log.Println("Galat API Gemini:", err) // Injeksi pelacak
+			log.Println("Galat API Gemini:", err)
 			http.Error(w, "Kegagalan komputasi LLM", http.StatusInternalServerError)
 			return
 		}
@@ -85,6 +90,30 @@ func main() {
 		json.NewEncoder(w).Encode(map[string]string{
 			"result": generatedText,
 		})
+	})
+
+	mux.HandleFunc("/api/rate", func(w http.ResponseWriter, r *http.Request) {
+		if r.Method != http.MethodPost {
+			http.Error(w, "Metode ditolak", http.StatusMethodNotAllowed)
+			return
+		}
+
+		var reqBody RateBody
+		if err := json.NewDecoder(r.Body).Decode(&reqBody); err != nil {
+			http.Error(w, "Format JSON tidak valid", http.StatusBadRequest)
+			return
+		}
+
+		query := `INSERT INTO kumpulan_script (kategori, deskripsi, kode_gdscript, skor_kualitas, total_digunakan) VALUES (?, ?, ?, ?, ?)`
+		_, err := db.Exec(query, "UI_Animasi", reqBody.Deskripsi, reqBody.Kode, reqBody.Skor, 1)
+		if err != nil {
+			log.Println("Gagal injeksi SQLite:", err)
+			http.Error(w, "Kegagalan database", http.StatusInternalServerError)
+			return
+		}
+
+		w.Header().Set("Content-Type", "application/json")
+		json.NewEncoder(w).Encode(map[string]string{"status": "Skor dan skrip terkunci di SQLite"})
 	})
 
 	server := &http.Server{
