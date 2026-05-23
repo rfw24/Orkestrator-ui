@@ -56,7 +56,7 @@ func main() {
 		}
 		defer client.Close()
 
-		model := client.GenerativeModel("gemini-1.5-pro")
+		model := client.GenerativeModel("gemini-1.5-pro-latest")
 		
 		// Instruksi absolut: Blokir format markdown, paksa output GDScript murni
 		model.SystemInstruction = &genai.Content{
