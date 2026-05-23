@@ -65,6 +65,7 @@ func main() {
 
 		resp, err := model.GenerateContent(ctx, genai.Text(reqBody.Prompt))
 		if err != nil {
+			log.Println("Galat API Gemini:", err) // Injeksi pelacak
 			http.Error(w, "Kegagalan komputasi LLM", http.StatusInternalServerError)
 			return
 		}
