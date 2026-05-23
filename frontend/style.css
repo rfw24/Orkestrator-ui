@@ -1,0 +1,108 @@
+:root {
+    --bg-main: #2C3033;
+    --bg-panel: #36454F;
+    --text-primary: #E0E0E0;
+    --accent: #5D8AA8;
+}
+
+body {
+    margin: 0;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: var(--bg-main);
+    color: var(--text-primary);
+    height: 100vh;
+    display: flex;
+}
+
+.container {
+    display: flex;
+    width: 100%;
+    height: 100%;
+    flex-direction: row;
+}
+
+@media (max-width: 768px) {
+    .container {
+        flex-direction: column;
+    }
+}
+
+.panel {
+    flex: 1;
+    padding: 20px;
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+}
+
+.controls-panel {
+    background-color: var(--bg-panel);
+    border-right: 2px solid var(--bg-main);
+}
+
+.sandbox-panel {
+    padding: 0;
+}
+
+textarea {
+    width: 100%;
+    height: 120px;
+    background-color: var(--bg-main);
+    color: var(--text-primary);
+    border: 1px solid var(--accent);
+    padding: 10px;
+    margin-bottom: 15px;
+    resize: none;
+}
+
+button {
+    background-color: var(--accent);
+    color: white;
+    border: none;
+    padding: 12px;
+    cursor: pointer;
+    font-weight: bold;
+    margin-bottom: 10px;
+}
+
+iframe {
+    width: 100%;
+    height: 100%;
+    border: none;
+    background-color: #2b2b2b;
+}
+
+.rating-buttons {
+    display: flex;
+    gap: 10px;
+}
+
+.btn-rate {
+    flex: 1;
+    background-color: var(--bg-main);
+    border: 1px solid var(--accent);
+}
+
+.btn-bad { 
+    border-color: #A85D5D; 
+    color: #E0E0E0; 
+}
+.btn-bad:active { 
+    background-color: #A85D5D; 
+}
+
+.btn-neutral { 
+    border-color: #8C8C8C; 
+    color: #E0E0E0; 
+}
+.btn-neutral:active { 
+    background-color: #8C8C8C; 
+}
+
+.btn-good { 
+    border-color: #5DA87A; 
+    color: #E0E0E0; 
+}
+.btn-good:active { 
+    background-color: #5DA87A; 
+}
