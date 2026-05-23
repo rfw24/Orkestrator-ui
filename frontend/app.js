@@ -1,66 +1,55 @@
 document.getElementById('btnGenerate').addEventListener('click', async () => {
-    const prompt = document.getElementById('userInput').value;
-    if (!prompt) return;
-
-    // Ubah status tombol menjadi loading
+    const promptText = document.getElementById('userInput').value;
     const btn = document.getElementById('btnGenerate');
-    btn.innerText = "Memproses di Cloud...";
+
+    if (!promptText.trim()) return;
+
+    btn.textContent = "Mengeksekusi AI...";
     btn.disabled = true;
 
-    // KODE FUNGSI SIMULASI: Efek Tween pada TextureButton Godot 4
-    const mockGDScript = `extends TextureButton
+    try {
+        const response = await fetch('/api/generate', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ prompt: promptText })
+        });
 
-func _ready() -> void:
-    # Sinyal spesifik interaksi layar sentuh (Android)
-    button_down.connect(_on_touch_down)
-    button_up.connect(_on_touch_up)
-    
-    # Mitigasi cacat logika jika jari ditarik keluar area sebelum dilepas
-    mouse_exited.connect(_on_touch_up) 
+        if (!response.ok) throw new Error("Gagal merespons dari server backend");
 
-func _on_touch_down() -> void:
-    # Visualisasi tombol tertekan ke dalam (mengecil)
-    var tween = create_tween()
-    tween.tween_property(self, "scale", Vector2(0.9, 0.9), 0.1)
-
-func _on_touch_up() -> void:
-    # Visualisasi tombol memantul kembali ke ukuran awal
-    var tween = create_tween()
-    tween.tween_property(self, "scale", Vector2(1.0, 1.0), 0.1)
-`;
-
-    // Jeda 1.5 detik seolah-olah sedang menunggu balasan AI
-    setTimeout(() => {
-        // Suntikkan kode simulasi ke dalam iframe (panel hitam di bawah)
-        const iframeDoc = document.getElementById('godotFrame').contentWindow.document;
+        const data = await response.json();
+        
+        // Merender hasil ke dalam iframe dengan tema charcoal
+        const iframe = document.getElementById('godotFrame');
+        const iframeDoc = iframe.contentWindow.document;
         iframeDoc.open();
-        // Membungkus kode dengan style agar senada dengan tema charcoal
-        iframeDoc.write('<pre style="color: #5D8AA8; font-family: monospace; padding: 15px; font-size: 14px; white-space: pre-wrap;">' + mockGDScript + '</pre>');
+        iframeDoc.write(`
+            <style>
+                body { background-color: #2b2b2b; color: #E0E0E0; font-family: monospace; font-size: 14px; padding: 15px; margin: 0; }
+                pre { white-space: pre-wrap; word-wrap: break-word; }
+            </style>
+            <pre>${data.result}</pre>
+        `);
         iframeDoc.close();
 
-        // Munculkan Mode 2 (Sistem Penilaian)
+        // Memicu kemunculan tombol Mode 2
         document.getElementById('mode2').style.display = 'block';
 
-        // Kembalikan tombol ke kondisi semula
-        btn.innerText = "Eksekusi Kode";
+    } catch (error) {
+        alert("Terjadi kesalahan: " + error.message);
+    } finally {
+        btn.textContent = "Eksekusi Kode";
         btn.disabled = false;
-    }, 1500);
+    }
 });
 
-// Deteksi input nilai metrik untuk melatih instruksi negatif/positif
-document.querySelectorAll('.btn-rate').forEach(btn => {
-    btn.addEventListener('click', (e) => {
+// Placeholder logika metrik penilaian
+document.querySelectorAll('.btn-rate').forEach(button => {
+    button.addEventListener('click', (e) => {
         const score = e.target.getAttribute('data-score');
-        console.log("Skor metrik dikirim ke database:", score);
-        
-        // Sembunyikan panel nilai setelah dievaluasi
+        console.log("Skor diinput:", score);
+        alert(`Skor ${score} dicatat untuk evaluasi performa!`);
         document.getElementById('mode2').style.display = 'none';
-        document.getElementById('userInput').value = '';
-        
-        // Bersihkan proyektor sandbox
-        const iframeDoc = document.getElementById('godotFrame').contentWindow.document;
-        iframeDoc.open();
-        iframeDoc.write('');
-        iframeDoc.close();
     });
 });
