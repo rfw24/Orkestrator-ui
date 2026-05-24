@@ -10,13 +10,17 @@
     <div class="container">
         <div class="panel controls-panel">
             <h2>Prompt Middleware</h2>
-            <select id="modelSelect" style="margin-bottom: 10px; padding: 8px; background-color: #2b2b2b; color: #E0E0E0; border: 1px solid #555; border-radius: 4px;">
-    <option value="flash">Gemini 3.5 Flash</option>
-    <option value="lite">Gemini 3.1 Flash-Lite</option>
-</select>
-            <textarea id="userInput" placeholder="Masukkan deskripsi logika menu (Contoh: Tombol dengan animasi Tween)"></textarea>
-            <button id="btnGenerate">Eksekusi Kode</button>
             
+            <select id="modelSelect" style="margin-bottom: 10px; padding: 8px; background-color: #2b2b2b; color: #E0E0E0; border: 1px solid #555; border-radius: 4px; width: 100%;">
+                <option value="flash">Gemini 3.5 Flash</option>
+                <option value="lite">Gemini 3.1 Flash-Lite</option>
+            </select>
+
+            <button id="btnHistory" style="margin-bottom: 15px; padding: 8px 12px; background-color: #4CAF50; color: white; border: none; border-radius: 4px; cursor: pointer; width: 100%;">Histori Skrip</button>
+            
+            <textarea id="userInput" placeholder="Masukkan deskripsi logika menu (Contoh: Tombol dengan animasi mengecil)"></textarea>
+            <button id="btnGenerate">Eksekusi Kode</button>
+
             <div class="feedback-section" id="mode2" style="display: none;">
                 <p>Beri nilai performa fungsi ini:</p>
                 <div class="rating-buttons">
@@ -26,11 +30,18 @@
                 </div>
             </div>
         </div>
-
-        <div class="panel sandbox-panel">
-            <iframe id="godotFrame" src="about:blank" title="Godot Sandbox Preview"></iframe>
+        
+        <div class="panel view-panel">
+            <iframe id="godotFrame" src="about:blank"></iframe>
         </div>
     </div>
+
+    <div id="historyModal" style="display: none; position: fixed; top: 5%; left: 5%; width: 90%; height: 90%; background-color: #2b2b2b; border: 1px solid #444; border-radius: 8px; padding: 20px; overflow-y: auto; z-index: 1000; box-shadow: 0px 4px 15px rgba(0,0,0,0.5); box-sizing: border-box;">
+        <button id="btnCloseHistory" style="float: right; padding: 8px 15px; background: #d9534f; color: white; border: none; border-radius: 4px; cursor: pointer;">Tutup Dasbor</button>
+        <h2 style="color: #E0E0E0; border-bottom: 1px solid #444; padding-bottom: 10px; margin-top: 0;">Dasbor Histori GDScript</h2>
+        <div id="historyContent" style="margin-top: 15px;"></div>
+    </div>
+
     <script src="app.js"></script>
 </body>
 </html>

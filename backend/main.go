@@ -25,6 +25,14 @@ type RateBody struct {
 	Skor      int    `json:"skor"`
 }
 
+type ScriptRecord struct {
+	ID        int    `json:"id"`
+	Kategori  string `json:"kategori"`
+	Deskripsi string `json:"deskripsi"`
+	Kode      string `json:"kode"`
+	Skor      int    `json:"skor"`
+}
+
 func main() {
 	_ = godotenv.Load()
 	apiKey := os.Getenv("GEMINI_API_KEY")
@@ -32,7 +40,7 @@ func main() {
 		log.Fatal("GEMINI_API_KEY kosong.")
 	}
 
-	db := initDB() // Berasal dari database.go
+	db := initDB()
 	defer db.Close()
 
 	mux := http.NewServeMux()
@@ -88,7 +96,6 @@ func main() {
 			}
 		}
 
-		// Pemangkasan spasi/enter berlebih
 		generatedText = strings.TrimSpace(generatedText)
 
 		w.Header().Set("Content-Type", "application/json")
@@ -121,11 +128,38 @@ func main() {
 		json.NewEncoder(w).Encode(map[string]string{"status": "Skor dikunci di SQLite"})
 	})
 
+	mux.HandleFunc("/api/history", func(w http.ResponseWriter, r *http.Request) {
+		if r.Method != http.MethodGet {
+			http.Error(w, "Metode ditolak", http.StatusMethodNotAllowed)
+			return
+		}
+
+		rows, err := db.Query("SELECT id, kategori, deskripsi, kode_gdscript, skor_kualitas FROM kumpulan_script ORDER BY id DESC")
+		if err != nil {
+			log.Println("Galat query history:", err)
+			http.Error(w, "Gagal mengambil data", http.StatusInternalServerError)
+			return
+		}
+		defer rows.Close()
+
+		var history []ScriptRecord
+		for rows.Next() {
+			var record ScriptRecord
+			if err := rows.Scan(&record.ID, &record.Kategori, &record.Deskripsi, &record.Kode, &record.Skor); err != nil {
+				continue
+			}
+			history = append(history, record)
+		}
+
+		w.Header().Set("Content-Type", "application/json")
+		json.NewEncoder(w).Encode(history)
+	})
+
 	server := &http.Server{
 		Addr:         ":8080",
 		Handler:      mux,
-		ReadTimeout:  10 * time.Second,
-		WriteTimeout: 80 * time.Second,
+		ReadTimeout:  5 * time.Second,
+		WriteTimeout: 65 * time.Second,
 	}
 
 	log.Println("Server aktif di port 8080")

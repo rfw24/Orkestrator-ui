@@ -69,3 +69,38 @@ document.querySelectorAll('.btn-rate').forEach(button => {
         }
     });
 });
+
+document.getElementById('btnHistory').addEventListener('click', async () => {
+    const modal = document.getElementById('historyModal');
+    const content = document.getElementById('historyContent');
+    content.innerHTML = '<p style="color: #E0E0E0;">Memindai SQLite...</p>';
+    modal.style.display = 'block';
+
+    try {
+        const response = await fetch('/api/history');
+        if (!response.ok) throw new Error("Gagal mengambil data server");
+        const data = await response.json();
+
+        if (!data || data.length === 0) {
+            content.innerHTML = '<p style="color: #888;">Belum ada skrip yang dikunci ke database.</p>';
+            return;
+        }
+
+        content.innerHTML = data.map(item => {
+            let borderColor = item.skor > 0 ? '#4CAF50' : item.skor < 0 ? '#d9534f' : '#f0ad4e';
+            let safeCode = item.kode.replace(/</g, "&lt;").replace(/>/g, "&gt;");
+            
+            return `
+            <div style="background-color: #333; margin-bottom: 15px; padding: 15px; border-radius: 4px; border-left: 5px solid ${borderColor};">
+                <h4 style="margin: 0 0 10px 0; color: #E0E0E0;">Prompt: ${item.deskripsi} <span style="font-size: 12px; color: ${borderColor};">(Skor: ${item.skor})</span></h4>
+                <pre style="background: #1e1e1e; padding: 10px; color: #d4d4d4; overflow-x: auto; border-radius: 4px;"><code>${safeCode}</code></pre>
+            </div>`;
+        }).join('');
+    } catch (err) {
+        content.innerHTML = `<p style="color: #d9534f;">Galat eksekusi: ${err.message}</p>`;
+    }
+});
+
+document.getElementById('btnCloseHistory').addEventListener('click', () => {
+    document.getElementById('historyModal').style.display = 'none';
+});
