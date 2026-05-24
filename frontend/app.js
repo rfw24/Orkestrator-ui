@@ -2,6 +2,7 @@ let lastGeneratedCode = "";
 
 document.getElementById('btnGenerate').addEventListener('click', async () => {
     const promptText = document.getElementById('userInput').value;
+    const selectedModel = document.getElementById('modelSelect').value;
     const btn = document.getElementById('btnGenerate');
 
     if (!promptText.trim()) return;
@@ -12,13 +13,11 @@ document.getElementById('btnGenerate').addEventListener('click', async () => {
     try {
         const response = await fetch('/api/generate', {
             method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({ prompt: promptText })
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ prompt: promptText, model: selectedModel })
         });
 
-        if (!response.ok) throw new Error("Gagal merespons dari server backend");
+        if (!response.ok) throw new Error("Gagal merespons dari server");
 
         const data = await response.json();
         lastGeneratedCode = data.result;
@@ -61,9 +60,9 @@ document.querySelectorAll('.btn-rate').forEach(button => {
                 })
             });
             
-            if (!response.ok) throw new Error("Penolakan dari server lokal");
+            if (!response.ok) throw new Error("Penolakan server lokal");
             
-            alert(`Skor ${score} berhasil dikunci ke SQLite.`);
+            alert(`Skor ${score} berhasil dikunci.`);
             document.getElementById('mode2').style.display = 'none';
         } catch (error) {
             alert("Gagal menyimpan metrik: " + error.message);

@@ -6,6 +6,7 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"strings"
 	"time"
 
 	"github.com/google/generative-ai-go/genai"
@@ -15,6 +16,7 @@ import (
 
 type RequestBody struct {
 	Prompt string `json:"prompt"`
+	Model  string `json:"model"`
 }
 
 type RateBody struct {
@@ -24,17 +26,13 @@ type RateBody struct {
 }
 
 func main() {
-	err := godotenv.Load()
-	if err != nil {
-		log.Println("Peringatan: File .env tidak ditemukan.")
-	}
-
+	_ = godotenv.Load()
 	apiKey := os.Getenv("GEMINI_API_KEY")
 	if apiKey == "" {
-		log.Fatal("GEMINI_API_KEY kosong. Eksekusi dihentikan.")
+		log.Fatal("GEMINI_API_KEY kosong.")
 	}
 
-	db := initDB()
+	db := initDB() // Berasal dari database.go
 	defer db.Close()
 
 	mux := http.NewServeMux()
@@ -62,8 +60,12 @@ func main() {
 		}
 		defer client.Close()
 
-		model := client.GenerativeModel("gemini-3.5-flash")
-		
+		modelName := "gemini-3.5-flash"
+		if reqBody.Model == "lite" {
+			modelName = "gemini-3.1-flash-lite"
+		}
+
+		model := client.GenerativeModel(modelName)
 		model.SystemInstruction = &genai.Content{
 			Parts: []genai.Part{genai.Text("Middleware Godot 4. Hasilkan kode GDScript mentah. Fokus interaksi mobile. Dilarang: penjelasan, komentar (#), markdown, spasi berlebih, baris kosong berulang. Tulis logika absolut sependek mungkin.")},
 		}
@@ -85,6 +87,9 @@ func main() {
 				}
 			}
 		}
+
+		// Pemangkasan spasi/enter berlebih
+		generatedText = strings.TrimSpace(generatedText)
 
 		w.Header().Set("Content-Type", "application/json")
 		json.NewEncoder(w).Encode(map[string]string{
@@ -113,7 +118,7 @@ func main() {
 		}
 
 		w.Header().Set("Content-Type", "application/json")
-		json.NewEncoder(w).Encode(map[string]string{"status": "Skor dan skrip terkunci di SQLite"})
+		json.NewEncoder(w).Encode(map[string]string{"status": "Skor dikunci di SQLite"})
 	})
 
 	server := &http.Server{
@@ -123,6 +128,6 @@ func main() {
 		WriteTimeout: 20 * time.Second,
 	}
 
-	log.Println("Server LLM aktif di port 8080")
+	log.Println("Server aktif di port 8080")
 	log.Fatal(server.ListenAndServe())
 }
