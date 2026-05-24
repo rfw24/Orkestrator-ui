@@ -57,6 +57,16 @@ func main() {
 			http.Error(w, "Format JSON tidak valid", http.StatusBadRequest)
 			return
 		}
+		// Intersepsi SQLite
+		var cachedCode string
+		errCache := db.QueryRow("SELECT kode_gdscript FROM kumpulan_script WHERE deskripsi = ? AND skor_kualitas = 1 ORDER BY id DESC LIMIT 1", reqBody.Prompt).Scan(&cachedCode)
+		if errCache == nil && cachedCode != "" {
+			w.Header().Set("Content-Type", "application/json")
+			json.NewEncoder(w).Encode(map[string]string{
+				"result": "# [EKSTRAKSI CACHE LOKAL]\n" + cachedCode,
+			})
+			return
+		}
 
 		ctx, cancel := context.WithTimeout(r.Context(), 60*time.Second)
 		defer cancel()
