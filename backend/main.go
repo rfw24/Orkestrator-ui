@@ -50,7 +50,7 @@ func main() {
 			return
 		}
 
-		ctx, cancel := context.WithTimeout(r.Context(), 15*time.Second)
+		ctx, cancel := context.WithTimeout(r.Context(), 60*time.Second)
 		defer cancel()
 
 		client, err := genai.NewClient(ctx, option.WithAPIKey(apiKey))
@@ -124,8 +124,8 @@ func main() {
 	server := &http.Server{
 		Addr:         ":8080",
 		Handler:      mux,
-		ReadTimeout:  5 * time.Second,
-		WriteTimeout: 20 * time.Second,
+		ReadTimeout:  10 * time.Second,
+		WriteTimeout: 80 * time.Second,
 	}
 
 	log.Println("Server aktif di port 8080")
